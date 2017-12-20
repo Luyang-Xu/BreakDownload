@@ -8,8 +8,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
 import com.luyang.myapplication.util.HttpUtil;
 import com.luyang.myapplication.vo.FileInfo;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -45,12 +47,13 @@ public class DownloadService extends Service {
         FileInfo file;
         switch (intent.getAction()) {
             case ACTION_START:
-               file = (FileInfo) intent.getSerializableExtra("fileInfo");
+                file = (FileInfo) intent.getSerializableExtra("fileInfo");
+                Log.e("FileInfo","url:"+file.getUrl());
                 new InitThread(file).start();
                 break;
             case ACTION_STOP:
                 file = (FileInfo) intent.getSerializableExtra("fileInfo");
-                if(task!=null){
+                if (task != null) {
                     task.isPaused = true;
                 }
                 break;
@@ -64,36 +67,38 @@ public class DownloadService extends Service {
     /**
      * 子线程和service的通信
      */
-    Handler handler =new Handler(){
+    Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            switch (msg.what){
+            switch (msg.what) {
                 case MSG_INIT:
-                    FileInfo f =(FileInfo) msg.obj;
-                    Log.d("HELLO","HELLO:"+f.getLength());
-                    task = new DownloadTask(f,DownloadService.this);
+                    FileInfo f = (FileInfo) msg.obj;
+                    Log.d("HELLO", "HELLO:" + f.getLength());
+                    task = new DownloadTask(f, DownloadService.this);
                     task.download();
                     break;
             }
         }
     };
 
-//在子线程中完成下载的操作
-    class InitThread extends Thread{
+    //在子线程中完成下载的操作
+    class InitThread extends Thread {
 
         private FileInfo file = null;
 
-        public InitThread(FileInfo f){
-            file= f;
+        public InitThread(FileInfo f) {
+            file = f;
         }
 
         @Override
         public void run() {
-            RandomAccessFile raf =null;
+            Log.e("RUN","RUN_METHOD");
+            RandomAccessFile raf = null;
             try {
                 long fileLength = HttpUtil.getResourceLength(file.getUrl());
                 //设置问价下载到本地后的路径有以及名称
+                Log.d("FileLength", "L:" + fileLength);
                 File dir = new File(FILEPATH);
                 if (!dir.exists()) {
                     dir.mkdir();
@@ -102,11 +107,11 @@ public class DownloadService extends Service {
                 raf = new RandomAccessFile(newFile, "rwd");
                 raf.setLength(fileLength);
                 file.setLength(fileLength);
-                handler.obtainMessage(MSG_INIT,file).sendToTarget();
+                handler.obtainMessage(MSG_INIT, file).sendToTarget();
 
             } catch (Exception e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 try {
                     raf.close();
                 } catch (IOException e) {

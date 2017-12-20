@@ -6,13 +6,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.luyang.myapplication.service.DownloadService;
 import com.luyang.myapplication.vo.FileInfo;
+
+import org.litepal.LitePal;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -32,9 +36,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        LitePal.getDatabase();
         init();
 
+        Log.e("FILEINFO",fileInfo.getUrl());
         //注册广播接收器
         IntentFilter filter = new IntentFilter();
         filter.addAction(DownloadService.ACTION_UPDATE);
@@ -48,10 +53,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         start = findViewById(R.id.start_button);
         stop = findViewById(R.id.stop_button);
         cancel = findViewById(R.id.cancel_button);
+        start.setOnClickListener(this);
+        stop.setOnClickListener(this);
+        cancel.setOnClickListener(this);
         fileInfo = new FileInfo();
         String url= "https://gss0.baidu.com/5r1ZsjOhKgQFm2e88IuM_a/srf/mac/baiduinput_mac_v5.0.0.23_1000e.dmg";
         fileInfo.setUrl(url);
         fileInfo.setFileName("百度输入法");
+        title.setText(fileInfo.getFileName());
     }
 
     @Override
@@ -59,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = new Intent(MainActivity.this,DownloadService.class);
         switch (v.getId()){
             case R.id.start_button:
+                Toast.makeText(MainActivity.this,"hello",Toast.LENGTH_SHORT).show();
                 intent.setAction(DownloadService.ACTION_START);
                 intent.putExtra("fileInfo",fileInfo);
                 startService(intent);
@@ -74,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startService(intent);
                 break;
             default:
+                break;
         }
     }
 
