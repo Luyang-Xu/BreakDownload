@@ -1,0 +1,10 @@
+<litepal>
+    <dbname value="download" />
+
+    <version value="1"/>
+
+    <list>
+        <mapping class="com.luyang.myapplication.vo.ThreadInfo" />
+    </list>
+
+</litepal>
